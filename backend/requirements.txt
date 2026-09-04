@@ -1,0 +1,55 @@
+# Core API Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.2,<3.0.0
+pydantic[email]>=2.9.2
+pydantic-settings>=2.12.0
+email-validator>=2.2.0
+
+# Database
+SQLAlchemy>=2.0.35
+asyncpg>=0.30.0
+alembic>=1.13.3
+
+# Security & Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart>=0.0.12
+
+# HTTP & Agents
+httpx>=0.27.2
+ollama>=0.6.1
+openai>=2.16.0
+
+# LangChain (for JD Bias Agent and other AI features)
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-core>=0.3.0
+langchain-openai>=0.3.0
+
+# Document Processing
+PyPDF2==3.0.1
+pypdf>=6.6.2
+PyMuPDF>=1.26.7
+pdfminer.six>=20251230
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# Web Scraping, Competitive Coding & Resilience
+curl_cffi>=0.7.0
+a2wsgi>=1.10.7
+requests>=2.32.3
+
+# Utilities
+python-dotenv==1.0.1
+loguru==0.7.2
+python-dateutil==2.9.0
+PyYAML==6.0.3
+tqdm==4.67.1
+
+# Testing
+pytest==8.3.3
+pytest-asyncio==0.24.0
+
+# Zynd Protocol Integration
+zyndai-agent>=0.2.2
