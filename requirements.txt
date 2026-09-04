@@ -1,0 +1,2 @@
+-r backend/requirements.txt
+-r agents_files/skill_verification_agent/requirements.txt

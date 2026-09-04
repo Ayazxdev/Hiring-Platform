@@ -1,0 +1,114 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+
+# Node / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.vite/
+dist/
+dist-ssr/
+build/
+.private
+*(Autosaved).glyphs
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Logs & temp
+logs/
+*.log
+tmp/
+*.tmp
+
+# Project-specific exclusions
+_zyndai_agent_shim_disabled/
+credentials/
+data/
+backend/data/resumes/
+backend/data/linkedin/
+backend/data/linkedins/
+chromedriver.exe
+*.exe
+
+# Temporary and staging
+jiit_fhn_temp/
+
+# Intermediary scripts and logs
+test_*.py
+debug_*.py
+verify_*.py
+inspect_*.py
+configure_*.py
+create_*.py
+cleanup_*.py
+clear_*.py
+kill_*.py
+trigger_*.py
+check_credential.py
+
+# Unignore vital backend application modules that match generic patterns
+!backend/app/agents/jd_bias.py
+!backend/app/routers/agent.py
+
+# Output files
+results.txt
+*.log
+final_results.txt
+test_results*.txt
+backend_log.txt
+
+# Runtime agent state & local DIDs
+.agent-*/
+**/.agent-*/
+passport_db.json
+human_review_queue.json
