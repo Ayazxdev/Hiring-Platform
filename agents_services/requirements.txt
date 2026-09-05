@@ -1,0 +1,34 @@
+# Core Service Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.2,<3.0.0
+python-multipart>=0.0.12
+
+# LLM & Agent Framework
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-ollama>=0.2.0
+ollama>=0.6.1
+openai>=2.16.0
+
+# Web Scraping & Browser Automation
+selenium>=4.15.0
+beautifulsoup4>=4.12.0
+requests>=2.32.3
+lxml>=6.0.2
+html5lib>=1.1
+
+# Document Processing
+pypdf>=5.0.0
+PyMuPDF>=1.26.7
+
+# Utilities
+python-dotenv==1.0.1
+httpx==0.27.2
+loguru==0.7.2
+python-dateutil==2.9.0
+
+# Added for compatibility
+flask>=3.0.0
+pdfplumber>=0.11.0
+pdfminer.six>=20231228
