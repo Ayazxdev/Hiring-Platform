@@ -1,0 +1,17 @@
+IMPORTANT: Font Setup Required
+
+Please add the following Neue Montreal font files to this directory:
+
+Required files:
+- NeueMontreal-Bold.woff2
+- NeueMontreal-Bold.woff
+- NeueMontreal-Medium.woff2
+- NeueMontreal-Medium.woff
+
+The application is already configured to load these fonts from /fonts/ path.
+
+Font Usage:
+- Hero title uses Neue Montreal Bold (800-900 weight)
+- Large headings use Neue Montreal Medium
+
+If you don't have these fonts, the application will fall back to system fonts, but the typography scale won't match the Studio Dialect reference exactly.
