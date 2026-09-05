@@ -1,0 +1,488 @@
+{
+    "OpenCV": {
+        "native_languages": [
+            "C++",
+            "Python",
+            "Java"
+        ],
+        "verification_methods": {
+            "Python": [
+                "import cv2",
+                "import opencv"
+            ],
+            "C++": [
+                "#include <opencv",
+                "cv::"
+            ],
+            "Java": [
+                "import org.opencv"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Computer vision library",
+        "derived_skills": [
+            "Image Processing",
+            "Computer Vision"
+        ]
+    },
+    "NumPy": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "import numpy",
+                "import np"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Numerical computing library",
+        "derived_skills": [
+            "Data Science",
+            "Numerical Computing"
+        ]
+    },
+    "PX4": {
+        "native_languages": [
+            "C++"
+        ],
+        "verification_methods": {
+            "C++": [
+                "px4_module",
+                "uORB",
+                "PX4_"
+            ]
+        },
+        "interface_patterns": {
+            "Python": [
+                "mavsdk",
+                "pymavlink"
+            ],
+            "C++": [
+                "mavsdk"
+            ]
+        },
+        "confidence_weight": 0.3,
+        "description": "Flight control stack (C++ implementation required for verification)",
+        "derived_skills": [
+            "UAV",
+            "Autonomous Systems",
+            "Robotics",
+            "Drone Development"
+        ]
+    },
+    "React": {
+        "native_languages": [
+            "JavaScript",
+            "TypeScript"
+        ],
+        "verification_methods": {
+            "JavaScript": [
+                "import react",
+                "from 'react'"
+            ],
+            "TypeScript": [
+                "import react",
+                "from 'react'"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "UI framework",
+        "derived_skills": [
+            "Frontend",
+            "Web Development"
+        ]
+    },
+    "YOLOv8": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "from ultralytics",
+                "import YOLO",
+                "ultralytics"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Object detection model",
+        "derived_skills": [
+            "Object Detection",
+            "Computer Vision",
+            "Deep Learning",
+            "Machine Learning"
+        ]
+    },
+    "YOLO": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "from ultralytics",
+                "import YOLO",
+                "yolo"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Object detection model family",
+        "derived_skills": [
+            "Object Detection",
+            "Computer Vision",
+            "Deep Learning"
+        ]
+    },
+    "FastAPI": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "from fastapi",
+                "import FastAPI"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Web framework",
+        "derived_skills": [
+            "Web Development",
+            "Backend Development",
+            "API Development"
+        ]
+    },
+    "TensorFlow": {
+        "native_languages": [
+            "Python",
+            "C++"
+        ],
+        "verification_methods": {
+            "Python": [
+                "import tensorflow",
+                "import tf"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Machine learning framework",
+        "derived_skills": [
+            "Machine Learning",
+            "Deep Learning",
+            "AI"
+        ]
+    },
+    "PyTorch": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "import torch",
+                "import pytorch"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Machine learning framework",
+        "derived_skills": [
+            "Machine Learning",
+            "Deep Learning",
+            "AI"
+        ]
+    },
+    "ROS": {
+        "native_languages": [
+            "C++",
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "import rospy"
+            ],
+            "C++": [
+                "#include <ros/"
+            ]
+        },
+        "confidence_weight": 0.8,
+        "description": "Robotics middleware",
+        "derived_skills": [
+            "Robotics",
+            "Autonomous Systems"
+        ]
+    },
+    "Gazebo": {
+        "native_languages": [
+            "C++"
+        ],
+        "verification_methods": {
+            "C++": [
+                "#include <gazebo"
+            ]
+        },
+        "interface_patterns": {
+            "Python": [
+                "gazebo_msgs",
+                "gazebo_ros"
+            ]
+        },
+        "confidence_weight": 0.4,
+        "description": "Robotics simulator (C++ plugins for verification)",
+        "derived_skills": [
+            "Robotics",
+            "Simulation",
+            "Autonomous Systems"
+        ]
+    },
+    "MAVSDK": {
+        "native_languages": [
+            "C++",
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "from mavsdk",
+                "import mavsdk"
+            ],
+            "C++": [
+                "#include <mavsdk"
+            ]
+        },
+        "confidence_weight": 0.9,
+        "description": "MAVLink SDK",
+        "derived_skills": [
+            "UAV",
+            "Drone Development",
+            "Autonomous Systems"
+        ]
+    },
+    "Pandas": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "import pandas",
+                "import pd"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Data manipulation library",
+        "derived_skills": [
+            "Data Science",
+            "Data Analysis"
+        ]
+    },
+    "scikit-learn": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": [
+                "from sklearn",
+                "import sklearn"
+            ]
+        },
+        "confidence_weight": 1.0,
+        "description": "Machine learning library",
+        "derived_skills": [
+            "Machine Learning",
+            "Data Science"
+        ]
+    },
+    "Docker": {
+        "native_languages": [
+            "Dockerfile",
+            "YAML",
+            "Python",
+            "JavaScript",
+            "TypeScript"
+        ],
+        "verification_methods": {
+            "Python": ["import docker"],
+            "Dockerfile": ["FROM ", "RUN ", "CMD "],
+            "YAML": ["docker-compose", "services:", "image:"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Container platform",
+        "derived_skills": [
+            "DevOps",
+            "Containerization",
+            "Cloud Infrastructure"
+        ]
+    },
+    "Tailwind CSS": {
+        "native_languages": [
+            "JavaScript",
+            "TypeScript",
+            "CSS",
+            "HTML"
+        ],
+        "verification_methods": {
+            "JavaScript": ["tailwindcss", "@tailwindcss"],
+            "CSS": ["@tailwind base", "@tailwind components", "@tailwind utilities"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Utility-first CSS framework",
+        "derived_skills": [
+            "Frontend",
+            "UI Design",
+            "CSS"
+        ]
+    },
+    "MongoDB": {
+        "native_languages": [
+            "Python",
+            "JavaScript",
+            "TypeScript"
+        ],
+        "verification_methods": {
+            "Python": ["import pymongo", "from pymongo import", "import motor"],
+            "JavaScript": ["mongoose", "mongodb"],
+            "TypeScript": ["mongoose", "mongodb"]
+        },
+        "confidence_weight": 1.0,
+        "description": "NoSQL document database",
+        "derived_skills": [
+            "Database",
+            "NoSQL",
+            "Backend"
+        ]
+    },
+    "Redis": {
+        "native_languages": [
+            "Python",
+            "JavaScript",
+            "TypeScript",
+            "Go"
+        ],
+        "verification_methods": {
+            "Python": ["import redis", "from redis import", "import aioredis"],
+            "JavaScript": ["redis", "ioredis"],
+            "TypeScript": ["redis", "ioredis"]
+        },
+        "confidence_weight": 1.0,
+        "description": "In-memory data structure store & cache",
+        "derived_skills": [
+            "Caching",
+            "Database",
+            "High Performance"
+        ]
+    },
+    "PostgreSQL": {
+        "native_languages": [
+            "Python",
+            "JavaScript",
+            "TypeScript",
+            "SQL"
+        ],
+        "verification_methods": {
+            "Python": ["import psycopg2", "import asyncpg", "from sqlalchemy import"],
+            "JavaScript": ["pg", "pg-promise", "prisma"],
+            "TypeScript": ["pg", "pg-promise", "prisma"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Relational SQL database",
+        "derived_skills": [
+            "SQL",
+            "Relational Database",
+            "Backend"
+        ]
+    },
+    "MySQL": {
+        "native_languages": [
+            "Python",
+            "JavaScript",
+            "TypeScript",
+            "SQL"
+        ],
+        "verification_methods": {
+            "Python": ["import pymysql", "import mysql"],
+            "JavaScript": ["mysql", "mysql2"],
+            "TypeScript": ["mysql", "mysql2"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Relational database",
+        "derived_skills": [
+            "SQL",
+            "Relational Database"
+        ]
+    },
+    "Flask": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": ["import flask", "from flask import"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Python micro web framework",
+        "derived_skills": [
+            "Web Development",
+            "RESTful API",
+            "Python"
+        ]
+    },
+    "Django": {
+        "native_languages": [
+            "Python"
+        ],
+        "verification_methods": {
+            "Python": ["import django", "from django import"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Python web framework",
+        "derived_skills": [
+            "Web Development",
+            "Full Stack",
+            "Python"
+        ]
+    },
+    "Express.js": {
+        "native_languages": [
+            "JavaScript",
+            "TypeScript"
+        ],
+        "verification_methods": {
+            "JavaScript": ["express", "require('express')"],
+            "TypeScript": ["express", "import express"]
+        },
+        "confidence_weight": 1.0,
+        "description": "Node.js web application framework",
+        "derived_skills": [
+            "Backend",
+            "Node.js",
+            "API Development"
+        ]
+    },
+    "Next.js": {
+        "native_languages": [
+            "JavaScript",
+            "TypeScript"
+        ],
+        "verification_methods": {
+            "JavaScript": ["next", "next/router", "next/navigation"],
+            "TypeScript": ["next", "next/router", "next/navigation"]
+        },
+        "confidence_weight": 1.0,
+        "description": "React framework for production",
+        "derived_skills": [
+            "React",
+            "Frontend",
+            "SSR",
+            "Full Stack"
+        ]
+    },
+    "Node.js": {
+        "native_languages": [
+            "JavaScript",
+            "TypeScript"
+        ],
+        "verification_methods": {
+            "JavaScript": ["process.env", "fs", "http", "path"],
+            "TypeScript": ["process.env", "fs", "http", "path"]
+        },
+        "confidence_weight": 1.0,
+        "description": "JavaScript runtime",
+        "derived_skills": [
+            "Backend",
+            "JavaScript Runtime"
+        ]
+    }
+}
