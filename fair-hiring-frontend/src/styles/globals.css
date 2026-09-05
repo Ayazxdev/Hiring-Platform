@@ -1,0 +1,437 @@
+/* Studio Dialect-inspired global styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* Note: Neue Montreal must be added manually as a local font */
+
+@font-face {
+    font-family: 'Neue Montreal';
+    src: url('/fonts/neue-montreal-free-demo-pangram-pangram-030418/NeueMontreal-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Neue Montreal';
+    src: url('/fonts/neue-montreal-free-demo-pangram-pangram-030418/NeueMontreal-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Neue Montreal';
+    src: url('/fonts/neue-montreal-free-demo-pangram-pangram-030418/NeueMontreal-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Fallback for Druk Wide since it's not in the system yet */
+@font-face {
+    font-family: 'Druk Wide';
+    src: local('Inter Black'), local('Inter-Black'), local('Inter Bold');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #e5e5e5;
+    color: #1c1c1c;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+@media (pointer: fine) {
+
+    body,
+    body * {
+        cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor-dot {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 8px;
+        height: 8px;
+        background-color: #e5e5e5;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 10000;
+        mix-blend-mode: difference;
+        will-change: transform;
+        display: block;
+    }
+}
+
+@media (pointer: coarse) {
+    .cursor-dot {
+        display: none;
+    }
+}
+
+.cursor-dot.hover {
+    transform: scale(2);
+}
+
+.cursor-dot.crosshair {
+    transform: scale(1.5);
+}
+
+.cursor-dot.crosshair::before,
+.cursor-dot.crosshair::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-color: #e5e5e5;
+    transition: all 0.3s ease;
+}
+
+.cursor-dot.crosshair::before {
+    width: 20px;
+    height: 1px;
+    transform: translate(-50%, -50%);
+}
+
+.cursor-dot.crosshair::after {
+    width: 1px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+}
+
+/* Disable default scrollbar */
+/* ::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+} */
+
+/* Typography */
+.hero-title {
+    font-family: 'Neue Montreal', sans-serif;
+    font-weight: 800;
+    font-size: clamp(5rem, 15vw, 20rem);
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: #e5e5e5;
+    overflow: hidden;
+    will-change: transform, opacity;
+}
+
+.hero-title-word {
+    font-family: 'Neue Montreal', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3.5rem, 10vw, 12rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: #e5e5e5;
+    margin: 0;
+    padding: 0;
+    will-change: transform;
+}
+
+.hero-badge {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.75rem, 1vw, 1.1rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #e5e5e5;
+    background: rgba(154, 154, 154, 0.1);
+    border: 1px solid #9a9a9a;
+    padding: 0.6rem 1.2rem;
+    display: inline-block;
+}
+
+.hero-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: clamp(0.9rem, 1.2vw, 1.4rem);
+    line-height: 1.5;
+    color: #9a9a9a;
+    max-width: 600px;
+}
+
+
+.product-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(0.65rem, 0.8vw, 0.9rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e5e5e5;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 0.4rem 1rem;
+    border: 1px solid transparent;
+}
+
+.product-label:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.parallax-canvas {
+    right: 0 !important;
+    left: auto !important;
+}
+
+.hero-info-marker {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.65rem;
+    color: #9a9a9a;
+    opacity: 0;
+    /* Changed to 0 for GSAP animation */
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-shadow: 0 0 5px rgba(229, 229, 229, 0.2);
+}
+
+@keyframes markerGlow {
+    0% {
+        opacity: 0.35;
+        text-shadow: 0 0 5px rgba(154, 154, 154, 0.2);
+        transform: scale(0.98);
+    }
+
+    100% {
+        opacity: 0.75;
+        text-shadow: 0 0 12px rgba(229, 229, 229, 0.5), 0 0 20px rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        transform: scale(1.02);
+    }
+}
+
+.navbar-dark {
+    backdrop-filter: blur(20px) !important;
+    background: rgba(229, 229, 229, 0.8) !important;
+    border-bottom: 1px solid rgba(28, 28, 28, 0.05);
+}
+
+.navbar-dark .product-label {
+    color: #1c1c1c !important;
+}
+
+.navbar-dark .menu-button {
+    color: #1c1c1c !important;
+    border-color: #1c1c1c !important;
+}
+
+.navbar-dark .menu-button:hover {
+    background: #1c1c1c !important;
+    color: #e5e5e5 !important;
+}
+
+.navbar-dark .product-label:hover {
+    background: #1c1c1c !important;
+    color: #e5e5e5 !important;
+    border-color: #1c1c1c !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.product-label,
+.menu-button {
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.menu-button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(0.65rem, 0.8vw, 0.9rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e5e5e5;
+    background: transparent;
+    border: 1px solid #9a9a9a;
+    padding: 0.4rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.menu-button:hover {
+    background: #e5e5e5;
+    color: #1c1c1c;
+    border-color: #e5e5e5;
+}
+
+/* Vision Section Styles */
+.font-montreal {
+    font-family: 'Neue Montreal', sans-serif;
+}
+
+.font-inter {
+    font-family: 'Inter', sans-serif;
+}
+
+.font-grotesk {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.heading-line {
+    display: block;
+}
+
+/* Fade transitions */
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Protocall AI Interview Styles */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Animation utilities for Protocall */
+.animate-in {
+    animation: animateIn 0.5s ease forwards;
+}
+
+@keyframes animateIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.slide-in-from-bottom-2 {
+    animation: slideInFromBottom2 0.3s ease forwards;
+}
+
+@keyframes slideInFromBottom2 {
+    from {
+        transform: translateY(8px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.slide-in-from-bottom-4 {
+    animation: slideInFromBottom4 0.5s ease forwards;
+}
+
+@keyframes slideInFromBottom4 {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.slide-in-from-bottom-6 {
+    animation: slideInFromBottom6 0.5s ease forwards;
+}
+
+@keyframes slideInFromBottom6 {
+    from {
+        transform: translateY(24px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.slide-in-from-bottom-8 {
+    animation: slideInFromBottom8 0.7s ease forwards;
+}
+
+@keyframes slideInFromBottom8 {
+    from {
+        transform: translateY(32px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.zoom-in-95 {
+    animation: zoomIn95 1s ease forwards;
+}
+
+@keyframes zoomIn95 {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mirror effect for video */
+.mirror {
+    transform: scaleX(-1);
+}
