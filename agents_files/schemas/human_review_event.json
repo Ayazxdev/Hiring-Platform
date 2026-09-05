@@ -1,0 +1,79 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Human Review Event",
+    "type": "object",
+    "properties": {
+        "review_id": {
+            "type": "string"
+        },
+        "candidate_id": {
+            "type": "string"
+        },
+        "job_id": {
+            "type": "string"
+        },
+        "triggered_by": {
+            "type": "string",
+            "enum": [
+                "ats_security",
+                "skill_verification",
+                "bias_detection"
+            ]
+        },
+        "severity": {
+            "type": "string",
+            "enum": [
+                "medium",
+                "high",
+                "critical"
+            ]
+        },
+        "reason": {
+            "type": "string"
+        },
+        "evidence": {
+            "type": "object"
+        },
+        "system_action_taken": {
+            "type": "string",
+            "enum": [
+                "blocked",
+                "paused",
+                "confidence_reduced"
+            ]
+        },
+        "status": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "CLEARED",
+                "CONFIRMED_BLOCK"
+            ],
+            "default": "PENDING"
+        },
+        "human_decision": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "reviewer_notes": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "required": [
+        "review_id",
+        "candidate_id",
+        "triggered_by",
+        "severity",
+        "reason",
+        "system_action_taken"
+    ]
+}
