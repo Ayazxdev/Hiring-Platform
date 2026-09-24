@@ -9,6 +9,11 @@ elif db_url.startswith("postgresql://") and "+asyncpg" not in db_url:
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 if "sslmode=" in db_url:
     db_url = db_url.replace("sslmode=", "ssl=")
+if "channel_binding=" in db_url:
+    import re
+    db_url = re.sub(r'[?&]channel_binding=[^&]+', '', db_url)
+    if "?" not in db_url and "&" in db_url:
+        db_url = db_url.replace("&", "?", 1)
 
 # auto-detect DB driver from DATABASE_URL
 engine = create_async_engine(

@@ -37,6 +37,13 @@ elif DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in DATABASE_URL
 if "sslmode=" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("sslmode=", "ssl=")
 
+# asyncpg does not accept channel_binding keyword
+if "channel_binding=" in DATABASE_URL:
+    import re
+    DATABASE_URL = re.sub(r'[?&]channel_binding=[^&]+', '', DATABASE_URL)
+    if "?" not in DATABASE_URL and "&" in DATABASE_URL:
+        DATABASE_URL = DATABASE_URL.replace("&", "?", 1)
+
 # Create async engine
 engine = create_async_engine(
     DATABASE_URL,
