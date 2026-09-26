@@ -2,7 +2,7 @@
 ATS Guard - Structure Integrity Checker
 Detects white text, tiny fonts, and hidden overlays
 """
-import fitz
+import pymupdf as fitz
 import logging
 
 logger = logging.getLogger(__name__)

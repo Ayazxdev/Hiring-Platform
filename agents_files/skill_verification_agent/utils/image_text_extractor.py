@@ -7,30 +7,33 @@ try:
     from PIL import Image
     import pytesseract
     import numpy as np
+    import shutil
     from pathlib import Path
     
-    # DEFINITIVE FIX: Hard-wire Tesseract path for Windows
-    TESSERACT_PATH = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
-
-    if TESSERACT_PATH.exists():
-        pytesseract.pytesseract.tesseract_cmd = str(TESSERACT_PATH)
-        logger.info(f"Tesseract definitively configured at: {TESSERACT_PATH}")
+    # Cross-platform Tesseract discovery (Windows & Linux / Render)
+    tesseract_found = False
+    which_path = shutil.which("tesseract")
+    if which_path:
+        pytesseract.pytesseract.tesseract_cmd = which_path
+        tesseract_found = True
+        logger.info(f"Tesseract found via PATH at: {which_path}")
     else:
-        # Fallback to fuzzy search if the primary path fails (to keep it robust)
-        tesseract_paths = [
-            r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
-            r'C:\Tesseract-OCR\tesseract.exe'
+        candidate_paths = [
+            Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe"),
+            Path(r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"),
+            Path(r"C:\Tesseract-OCR\tesseract.exe"),
+            Path("/usr/bin/tesseract"),
+            Path("/usr/local/bin/tesseract"),
         ]
-        tesseract_found = False
-        for path in tesseract_paths:
-            if os.path.exists(path):
-                pytesseract.pytesseract.tesseract_cmd = path
+        for p in candidate_paths:
+            if p.exists():
+                pytesseract.pytesseract.tesseract_cmd = str(p)
                 tesseract_found = True
-                logger.info(f"Tesseract found via fallback at: {path}")
+                logger.info(f"Tesseract configured at: {p}")
                 break
         
-        if not tesseract_found:
-            logger.warning("Tesseract binary not found at expected path. Image scanning may fail.")
+    if not tesseract_found:
+        logger.info("Tesseract binary not installed on this host. Text-based PDF extraction (PyMuPDF) will be used for resumes.")
 
 except ImportError as e:
     Image = None

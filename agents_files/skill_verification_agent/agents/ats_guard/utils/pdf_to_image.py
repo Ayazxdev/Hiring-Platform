@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import pymupdf as fitz
 from PIL import Image
 
 def pdf_to_images(pdf_path):

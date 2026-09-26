@@ -1,6 +1,6 @@
 import io
 import pdfplumber
-import fitz  # PyMuPDF
+import pymupdf as fitz
 
 class WhiteTextDetector:
     """

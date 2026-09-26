@@ -27,12 +27,17 @@ class DualLLMClient:
         self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
         self.ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2") 
         
-        # OpenRouter Config
-        self.openrouter_url = os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
-        if not self.openrouter_url.endswith("/chat/completions"):
-            self.openrouter_url = self.openrouter_url.rstrip("/") + "/chat/completions"
-            
-        self.cloud_model = os.getenv("LLM_MODEL") or os.getenv("OPENROUTER_MODEL") or "anthropic/claude-3-haiku"
+        # OpenRouter / Gemini Config
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        if not self.openrouter_api_key and gemini_key and not gemini_key.startswith("your_"):
+            self.openrouter_api_key = gemini_key
+            self.openrouter_url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+            self.cloud_model = os.getenv("LLM_MODEL") or "gemini-1.5-flash"
+        else:
+            self.openrouter_url = os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
+            if not self.openrouter_url.endswith("/chat/completions"):
+                self.openrouter_url = self.openrouter_url.rstrip("/") + "/chat/completions"
+            self.cloud_model = os.getenv("LLM_MODEL") or os.getenv("OPENROUTER_MODEL") or "anthropic/claude-3-haiku"
 
     def call_ollama(self, prompt: str, system_prompt: str = "") -> Dict:
         """Execute prompt on Local Ollama."""

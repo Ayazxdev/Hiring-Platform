@@ -9,7 +9,7 @@ except ImportError:
 
 from pdfminer.high_level import extract_text
 from PIL import Image
-import fitz  # PyMuPDF
+import pymupdf as fitz
 import logging
 
 logger = logging.getLogger(__name__)

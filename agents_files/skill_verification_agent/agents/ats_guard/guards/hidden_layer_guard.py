@@ -1,6 +1,6 @@
 def run(pdf_path: str, extracted_text: str):
     try:
-        import fitz
+        import pymupdf as fitz
         doc = fitz.open(pdf_path)
     except Exception:
         return {"flag": False}
