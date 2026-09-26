@@ -83,6 +83,22 @@ class AgentClient:
                 "codeforces": os.getenv("CODEFORCES_SERVICE_URL", "http://localhost:8010"),
             }
     
+        # Load unified agents in-memory if available
+        self.internal_agents_app = None
+        try:
+            import sys
+            from pathlib import Path
+            root_dir = Path(__file__).resolve().parent.parent.parent
+            agents_dir = root_dir / "agents_services"
+            for d in [str(root_dir), str(agents_dir)]:
+                if d not in sys.path:
+                    sys.path.insert(0, d)
+            from agents_services.agents_aggregator import app as agents_app
+            self.internal_agents_app = agents_app
+            logger.info("AgentClient: in-memory unified agents loaded successfully.")
+        except Exception as e:
+            logger.warning(f"AgentClient: in-memory agents not loaded ({e}), using HTTP endpoints.")
+    
     async def close(self):
         """No persistent sessions to close for now."""
         pass
@@ -99,7 +115,23 @@ class AgentClient:
         if agent_name not in self.endpoints:
             raise ValueError(f"Unknown agent: {agent_name}")
 
-        
+        # In-memory ASGI dispatch when unified agents are available
+        if self.internal_agents_app is not None and not USE_ZYND:
+            try:
+                transport = httpx.ASGITransport(app=self.internal_agents_app)
+                async with httpx.AsyncClient(transport=transport, base_url="http://agents", timeout=httpx.Timeout(self.timeout)) as client:
+                    target_path = f"/{agent_name}{endpoint}"
+                    logger.info(f"Calling internal agent '{agent_name}' at {target_path}")
+                    response = await client.post(target_path, json=payload)
+                    response.raise_for_status()
+                    data = response.json() if response.status_code != 204 else {}
+                    return {
+                        "success": True,
+                        "data": data,
+                        "status_code": response.status_code
+                    }
+            except Exception as e:
+                logger.warning(f"Internal call to '{agent_name}' failed: {e}. Falling back to network endpoints.")
 
         # Zynd mode: discover + call remote agent via /webhook/sync
         ZYND_AGENTS = ["matching", "bias", "skill", "ats", "passport", "github", "linkedin", "leetcode", "codeforces"]

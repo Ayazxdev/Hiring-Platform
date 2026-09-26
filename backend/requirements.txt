@@ -40,6 +40,11 @@ Pillow>=10.0.0
 curl_cffi>=0.7.0
 a2wsgi>=1.10.7
 requests>=2.32.3
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+html5lib>=1.1
+flask>=3.0.0
+pdfplumber>=0.11.0
 
 # Utilities
 python-dotenv==1.0.1

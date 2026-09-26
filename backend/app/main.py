@@ -103,6 +103,22 @@ app.include_router(job.router)
 app.include_router(application.router)
 app.include_router(passport.router)
 
+# Mount Unified Agents Aggregator so all agent services run in-process
+try:
+    import sys
+    from pathlib import Path
+    _root_dir = Path(__file__).resolve().parent.parent.parent
+    _agents_dir = _root_dir / "agents_services"
+    for _p in [str(_root_dir), str(_agents_dir)]:
+        if _p not in sys.path:
+            sys.path.insert(0, _p)
+    from agents_services.agents_aggregator import app as agents_app
+    app.mount("/agents", agents_app)
+    logger.info("Unified Agents Aggregator mounted at /agents")
+except Exception as e:
+    logger.warning(f"Could not mount agents_aggregator: {e}")
+
+
 
 # Health check endpoint
 @app.get("/health")
