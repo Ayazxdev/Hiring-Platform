@@ -35,12 +35,20 @@ export function initScene(canvas) {
     });
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.SRGBColorSpace) {
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+    } else if (THREE.sRGBEncoding) {
+        renderer.outputEncoding = THREE.sRGBEncoding;
+    }
 
     // Materials
     const bakedTexture = textureLoader.load('/models/baked.jpg');
     bakedTexture.flipY = false;
-    bakedTexture.encoding = THREE.sRGBEncoding;
+    if (THREE.SRGBColorSpace) {
+        bakedTexture.colorSpace = THREE.SRGBColorSpace;
+    } else if (THREE.sRGBEncoding) {
+        bakedTexture.encoding = THREE.sRGBEncoding;
+    }
     const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
 
     // Model reference for rotation
@@ -67,7 +75,9 @@ export function initScene(canvas) {
             }
         },
         (xhr) => {
-            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            if (xhr.total && xhr.total > 0) {
+                console.log(Math.round((xhr.loaded / xhr.total) * 100) + '% loaded');
+            }
         }
     );
 

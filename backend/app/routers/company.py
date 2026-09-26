@@ -8,7 +8,7 @@ from app.database import get_db # type: ignore
 from app.models import Job, Application, Candidate, Credential, AgentRun, ReviewCase, Company, Blacklist, ApplicationStatus, utc_now # type: ignore
 from app.agents.jd_bias import JobBiasAgent # type: ignore
 from app.agents.job_extraction import JobExtractionAgent # type: ignore
-from sqlalchemy import select, func # type: ignore
+from sqlalchemy import select, func, delete, or_ # type: ignore
 from app.agent_client import AgentClient # type: ignore
 from app.audit import log_event # type: ignore
 import logging
@@ -192,16 +192,44 @@ async def create_job(payload: dict, db: AsyncSession = Depends(get_db)):
 
 @router.delete("/{company_id}/jobs/{job_id}")
 async def delete_job(company_id: str, job_id: int, db: AsyncSession = Depends(get_db)):
-    """Delete a job posting and its associated data"""
-    q = await db.execute(select(Job).where(Job.id == job_id, Job.company_id == company_id))
-    job = q.scalar_one_or_none()
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
+    """Delete a job posting and its associated data (applications, review cases, credentials, agent runs)"""
+    try:
+        q = await db.execute(select(Job).where(Job.id == job_id, Job.company_id == company_id))
+        job = q.scalar_one_or_none()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
 
-    await db.delete(job)
-    await db.commit()
-    logger.info(f"Job {job_id} deleted by company {company_id}")
-    return {"status": "success", "message": f"Job {job_id} successfully deleted"}
+        # 1. Fetch all application IDs for this job
+        app_res = await db.execute(select(Application.id).where(Application.job_id == job_id))
+        app_ids = [row[0] for row in app_res.fetchall()]
+
+        # 2. Delete review cases referencing this job OR any of its applications
+        if app_ids:
+            await db.execute(
+                delete(ReviewCase).where(
+                    or_(ReviewCase.job_id == job_id, ReviewCase.application_id.in_(app_ids))
+                )
+            )
+            # 3. Delete agent runs for these applications
+            await db.execute(delete(AgentRun).where(AgentRun.application_id.in_(app_ids)))
+            # 4. Delete credentials for these applications
+            await db.execute(delete(Credential).where(Credential.application_id.in_(app_ids)))
+            # 5. Delete applications
+            await db.execute(delete(Application).where(Application.id.in_(app_ids)))
+        else:
+            await db.execute(delete(ReviewCase).where(ReviewCase.job_id == job_id))
+
+        # 6. Delete the job itself
+        await db.execute(delete(Job).where(Job.id == job_id, Job.company_id == company_id))
+        await db.commit()
+        logger.info(f"Job {job_id} deleted by company {company_id}")
+        return {"status": "success", "message": f"Job {job_id} successfully deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to delete job {job_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to delete job: {str(e)}")
 
 
 @router.get("/{company_id}/stats")

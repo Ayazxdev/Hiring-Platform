@@ -13,7 +13,7 @@ export default function Hero({ isSiteLoaded }) {
     const titleLinesRef = useRef([]);
 
     useEffect(() => {
-        if (!isSiteLoaded) return;
+        if (!isSiteLoaded || !containerRef.current) return;
 
         const ctx = gsap.context(() => {
             // Masked reveal for title lines and subtext
@@ -40,7 +40,7 @@ export default function Hero({ isSiteLoaded }) {
             // Fade and blur title text as user scrolls
             const textScrollTl = gsap.timeline({
                 scrollTrigger: {
-                    trigger: '.hero-section',
+                    trigger: containerRef.current,
                     start: 'top top',
                     end: '100% top',
                     scrub: true,
@@ -61,7 +61,7 @@ export default function Hero({ isSiteLoaded }) {
             const markers = containerRef.current.querySelectorAll('.hero-info-marker');
             const markerTimeline = gsap.timeline({
                 scrollTrigger: {
-                    trigger: '.hero-section',
+                    trigger: containerRef.current,
                     start: 'top top',
                     end: 'bottom+=200vh top',
                     scrub: 1.5,
@@ -78,7 +78,7 @@ export default function Hero({ isSiteLoaded }) {
             markers.forEach((marker, index) => {
                 gsap.to(marker, {
                     scrollTrigger: {
-                        trigger: '.hero-section',
+                        trigger: containerRef.current,
                         start: `${5 + (index * 5)}% top`,
                         end: `${15 + (index * 5)}% top`,
                         scrub: 1,

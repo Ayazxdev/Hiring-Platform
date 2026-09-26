@@ -225,8 +225,8 @@ export default function CompanyDashboard({ onNavigateToRole, onExit }) {
               <label className="font-grotesk text-[10px] tracking-[0.2em] uppercase font-black text-[#1c1c1c]">
                 SKILL CONFIDENCE DISTRIBUTION
               </label>
-              <div className="h-[140px] w-full pt-4">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[140px] w-full pt-4 min-w-[200px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                   <BarChart
                     data={MOCK_CHART_DATA}
                     margin={{ top: 0, right: 0, left: -25, bottom: 0 }}

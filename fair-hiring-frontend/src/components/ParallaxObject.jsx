@@ -61,6 +61,9 @@ export default function ParallaxObject({ lenisInstance, isActive = true }) {
         // Disable user controls during scroll phase
         controls.enabled = false;
 
+        const heroEl = document.querySelector('.hero-section');
+        if (!heroEl || !containerRef.current) return;
+
         const ctx = gsap.context(() => {
             // Create a continuous scroll-based animation
             const masterTimeline = gsap.timeline({

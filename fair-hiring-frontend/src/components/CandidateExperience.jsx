@@ -952,8 +952,8 @@ export default function CandidateExperience({ onExit }) {
                         </span>
                       </div>
 
-                      <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                      <div className="h-[300px] w-full min-w-[200px]">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                           <BarChart data={benchmarkData}>
                             <XAxis
                               dataKey="skill"

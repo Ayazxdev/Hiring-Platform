@@ -145,8 +145,8 @@ const SkillDetailCard = ({ skill, onClose }) => {
                                 <label className="font-grotesk text-[10px] uppercase opacity-100 tracking-widest font-black text-black">
                                     DISTRIBUTION
                                 </label>
-                                <div className="h-24 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                <div className="h-24 w-full min-w-[150px]">
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={60}>
                                         <BarChart
                                             data={skill.distribution}
                                             margin={{ top: 0, right: 0, left: -40, bottom: 0 }}

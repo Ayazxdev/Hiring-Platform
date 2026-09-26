@@ -78,8 +78,8 @@ export const AnalysisReport = ({ analysis, config, onReset }) => {
                     <h3 className="text-[11px] font-black mb-10 inline-block border-b-[3px] border-[#1c1c1c] pb-2 uppercase tracking-[0.3em] font-grotesk">
                         Skill Segmentation
                     </h3>
-                    <div className="w-full h-[320px] relative" style={{ minWidth: 0 }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="w-full h-[320px] relative min-w-[200px]" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
                             <BarChart data={scoreData} layout="vertical" margin={{ left: -30, right: 30 }}>
                                 <XAxis type="number" hide domain={[0, 100]} />
                                 <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 9, fill: '#1c1c1c', fontWeight: 900, letterSpacing: '0.1em' }} axisLine={false} tickLine={false} />
