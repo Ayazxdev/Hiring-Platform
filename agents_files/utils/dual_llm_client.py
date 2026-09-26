@@ -31,7 +31,7 @@ class DualLLMClient:
         if not self.openrouter_api_key and gemini_key and not gemini_key.startswith("your_"):
             self.openrouter_api_key = gemini_key
             self.openrouter_url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-            self.cloud_model = os.getenv("LLM_MODEL") or "gemini-1.5-flash"
+            self.cloud_model = os.getenv("LLM_MODEL") or "gemini-3.8-flash"
         else:
             self.openrouter_url = os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
             if not self.openrouter_url.endswith("/chat/completions"):

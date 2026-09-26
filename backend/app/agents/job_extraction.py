@@ -22,7 +22,7 @@ class JobExtractionAgent:
         elif has_gemini:
             api_key = os.getenv("GEMINI_API_KEY")
             base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-            model_to_use = model_name or "gemini-2.5-flash"
+            model_to_use = model_name or os.getenv("LLM_MODEL") or "gemini-3.8-flash"
         elif has_openai:
             api_key = os.getenv("OPENAI_API_KEY")
             base_url = os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1"

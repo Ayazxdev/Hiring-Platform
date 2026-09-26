@@ -30,7 +30,7 @@ class JobBiasAgent:
         elif has_gemini:
             api_key = os.getenv("GEMINI_API_KEY")
             base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
-            model_to_use = model_name or os.getenv("LLM_MODEL") or "gemini-1.5-flash"
+            model_to_use = model_name or os.getenv("LLM_MODEL") or "gemini-3.8-flash"
         else:
             base_url = os.getenv("OPENAI_API_BASE") or default_ollama_v1
             model_to_use = model_name or os.getenv("LLM_MODEL") or os.getenv("OLLAMA_MODEL") or "llama3.2"
