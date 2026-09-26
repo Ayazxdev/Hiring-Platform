@@ -92,42 +92,29 @@ async def create_application(
     existing = result.scalar_one_or_none()
     
     if existing:
-        # Update existing application
-        existing.resume_text = request.resume_text
-        existing.github_url = request.github_url
-        existing.leetcode_url = request.leetcode_url
-        existing.linkedin_url = request.linkedin_url
-        existing.codeforces_url = request.codeforces_url
-        existing.status = ApplicationStatus.pending
-        existing.pipeline_status = "not_started"
-        existing.updated_at = datetime.utcnow()
-        
-        # Reset match score and feedback as it's a re-run
-        existing.match_score = None
-        existing.feedback_json = None
-        
-        await db.commit()
-        await db.refresh(existing)
-        application = existing
-    else:
-        # Create application
-        application = Application(
-            candidate_id=candidate.id,
-            job_id=job.id,
-            resume_text=request.resume_text,
-            github_url=request.github_url,
-            leetcode_url=request.leetcode_url,
-            linkedin_url=request.linkedin_url,
-            codeforces_url=request.codeforces_url,
-            status=ApplicationStatus.pending,
-            pipeline_status="not_started",
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already applied for this role. Multiple applications for the same role are not permitted."
         )
-        
-        db.add(application)
-        await db.commit()
-        await db.refresh(application)
+
+    # Create application
+    application = Application(
+        candidate_id=candidate.id,
+        job_id=job.id,
+        resume_text=request.resume_text,
+        github_url=request.github_url,
+        leetcode_url=request.leetcode_url,
+        linkedin_url=request.linkedin_url,
+        codeforces_url=request.codeforces_url,
+        status=ApplicationStatus.pending,
+        pipeline_status="not_started",
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    
+    db.add(application)
+    await db.commit()
+    await db.refresh(application)
     
     # Trigger pipeline in background if requested
     if request.run_pipeline:

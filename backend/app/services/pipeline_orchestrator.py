@@ -1067,22 +1067,6 @@ class PipelineOrchestrator:
                 await self.save_credential_state(application_id, self.state)
                 
             # Final Status Update
-            # Accumulate newly verified skills into candidate's master profile
-            verified_skills = self.state["derived"].get("verified_skills", [])
-            if verified_skills:
-                existing_skills = list(cand.skills or [])
-                updated = False
-                for s in verified_skills:
-                    s_name = s.get("name") if isinstance(s, dict) else str(s)
-                    if s_name and s_name not in existing_skills:
-                        existing_skills.append(s_name)
-                        updated = True
-                if updated:
-                    cand.skills = existing_skills
-                    from sqlalchemy.orm.attributes import flag_modified
-                    flag_modified(cand, "skills")
-                    log.info(f"[PIPELINE] Updated candidate {cand.id} cumulative skills: {existing_skills}")
-
             app.status = ApplicationStatus.matched
             app.pipeline_status = PipelineStatus.completed
             self.state["pipeline_status"] = "completed"
