@@ -214,7 +214,7 @@ class SkillVerificationAgentV2:
         
         # 3. Cleanup & Standardization + Ontology Verification
         cleaned_skills = {}
-        NOISE_TOOLS = ["vs code", "github", "git", "gitlab", "bitbucket", "npm", "yarn"]
+        NOISE_TOOLS = ["vs code", "npm", "yarn"]
         
         # Prepare combined evidence text for verification
         # 2026 Fix: Combine all available text signals for more robust pattern matching

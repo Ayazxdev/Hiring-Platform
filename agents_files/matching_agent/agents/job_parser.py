@@ -10,18 +10,30 @@ logger = logging.getLogger(__name__)
 class JobParserAgent:
     """
     Agent to extract structured requirements from raw job descriptions.
-    Uses protected OpenRouter calls with safe fallbacks.
+    Uses Gemini or OpenRouter with safe fallbacks.
     """
     
     def __init__(self):
         self.client = None
-        api_key = (
-            os.getenv("OPENROUTER_API_KEY") or 
-            os.getenv("OPENAI_API_KEY") or 
-            os.getenv("API_KEY") or
-            OPENROUTER_API_KEY
-        )
-        base_url = os.getenv("OPENAI_API_BASE") or OPENROUTER_BASE_URL
+        api_key = None
+        base_url = None
+        self.model_name = "gemini-3.8-flash"
+
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        if gemini_key and not gemini_key.startswith("your_"):
+            api_key = gemini_key
+            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            self.model_name = "gemini-3.8-flash"
+        else:
+            raw_or_key = os.getenv("OPENROUTER_API_KEY") or OPENROUTER_API_KEY
+            if raw_or_key and not raw_or_key.startswith("your_"):
+                api_key = raw_or_key
+                base_url = os.getenv("OPENAI_API_BASE") or OPENROUTER_BASE_URL
+                self.model_name = os.getenv("LLM_MODEL") or "openai/gpt-4o-mini"
+            elif os.getenv("OPENAI_API_KEY") and not os.getenv("OPENAI_API_KEY").startswith("your_"):
+                api_key = os.getenv("OPENAI_API_KEY")
+                base_url = os.getenv("OPENAI_API_BASE") or "https://api.openai.com/v1"
+                self.model_name = os.getenv("LLM_MODEL") or "gpt-4o-mini"
         
         if api_key:
             try:
@@ -37,16 +49,22 @@ class JobParserAgent:
         Extract required skills from job description using LLM with fallback.
         """
         if not self.client:
-            logger.warning("[MATCHING] OpenAI client not initialized. Using fallback.")
+            logger.warning("[MATCHING] LLM client not initialized. Using fallback.")
             return self._fallback_extraction(job_description)
 
         try:
-            logger.info("[MATCHING] Calling OpenRouter for JD extraction (Model: openai/gpt-4o-mini)...")
+            logger.info(f"[MATCHING] Calling LLM for JD extraction (Model: {self.model_name})...")
             response = self.client.chat.completions.create(
-                model="openai/gpt-4o-mini", # ✅ SAFE WORKING MODEL
+                model=self.model_name,
                 messages=[
-                    {"role": "system", "content": "Extract required technical skills from the job description. Return a JSON list of strings."},
-                    {"role": "user", "content": job_description}
+                    {
+                        "role": "system",
+                        "content": "You are a job parser. Extract required technical skills from the job description. Return JSON with 'required_skills' (array of strings, e.g. ['Python', 'Docker'])."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Extract required skills from this JD:\n\n{job_description}"
+                    }
                 ],
                 response_format={"type": "json_object"}
             )
@@ -54,7 +72,6 @@ class JobParserAgent:
             content = response.choices[0].message.content
             data = json.loads(content)
             
-            # Expecting {"required_skills": [...]} or similar
             if isinstance(data, dict):
                 skills = data.get("required_skills", data.get("skills", []))
             else:
@@ -66,32 +83,34 @@ class JobParserAgent:
             return {"strict_requirements": skills}
 
         except Exception as e:
-            logger.error(f"[MATCHING] LLM extraction failed: {e}")
-            print(f"[MATCHING] 🔄 Using fallback skill extraction due to error: {e}")
+            logger.warning(f"[MATCHING] LLM extraction failed: {e}. Using fallback.")
             return self._fallback_extraction(job_description)
 
     def _fallback_extraction(self, job_description: str) -> Dict[str, Any]:
         """
-        Safe fallback: Simple keyword extractor to prevent pipeline breaks.
+        Safe fallback: Keyword extractor covering common languages, systems, and tools.
         """
-        print("[MATCHING] Using fallback skill extraction")
-        # Very simple heuristic: words with length > 3 that look like tech
-        # In a real system, this would use a local keyword list
-        common_tech = ["python", "javascript", "react", "node", "aws", "docker", "sql", "java", "fastapi"]
+        logger.info("[MATCHING] Using fallback skill extraction")
+        import re
+        known_tech = [
+            "Python", "C++", "Rust", "Java", "JavaScript", "TypeScript", "Go",
+            "Docker", "Docker Compose", "CI/CD", "Git", "REST APIs", "gRPC", "FastAPI",
+            "Node.js", "React", "Next.js", "PostgreSQL", "MongoDB", "Databases", "DBMS",
+            "Operating Systems", "Object-Oriented Programming", "Data Structures & Algorithms",
+            "System Design", "Distributed Systems", "Asynchronous Programming", "Concurrent Programming",
+            "PyTorch", "ONNX", "NLP", "Vector Search", "LLMs", "MCP"
+        ]
         
-        words = job_description.lower().split()
-        potential_skills = []
-        
-        for word in words:
-            word = word.strip(".,:;()[]")
-            if word in common_tech and word not in potential_skills:
-                potential_skills.append(word.capitalize())
-            elif len(word) > 4 and word[0].isupper() and word not in potential_skills:
-                # Add capitalized words that might be names/tech
-                potential_skills.append(word)
+        extracted = []
+        for tech in known_tech:
+            escaped = re.escape(tech)
+            if tech == "C++":
+                if re.search(r'(?:\bC\+\+(?!\w)|\bCPP\b)', job_description, re.I):
+                    extracted.append(tech)
+            elif re.search(rf'\b{escaped}\b', job_description, re.I):
+                extracted.append(tech)
 
-        # Ensure we have something
-        if not potential_skills:
-            potential_skills = [w.strip(".,") for w in words if len(w) > 5][:10]
+        if not extracted:
+            extracted = ["Python", "Backend", "APIs", "Git", "Docker"]
 
-        return {"strict_requirements": potential_skills[:15]}
+        return {"strict_requirements": extracted}

@@ -102,10 +102,10 @@ class MatchingAgent:
         soft = set(jd.get("soft_requirements", []))
         verified = set(cand.get("verified_skills", []))
 
-        fw_match = len(verified & frameworks) / max(1, len(frameworks))
-        infra_match = len(verified & infra) / max(1, len(infra))
-        tool_match = len(verified & tools) / max(1, len(tools))
-        soft_match = len(verified & soft) / max(1, len(soft)) if soft else 0.0
+        fw_match = len(verified & frameworks) / len(frameworks) if frameworks else 1.0
+        infra_match = len(verified & infra) / len(infra) if infra else 1.0
+        tool_match = len(verified & tools) / len(tools) if tools else 1.0
+        soft_match = len(verified & soft) / len(soft) if soft else 1.0
 
         pillar_score = (0.40 * fw_match + 0.25 * tool_match + 0.20 * infra_match + 0.15 * soft_match)
         return pillar_score * 0.20
@@ -113,14 +113,18 @@ class MatchingAgent:
     def _score_experience(self, jd: Dict, cand: Dict) -> float:
         """Pillar 3: Experience (20% Weight) - Rewards relevant work history"""
         experience_list = cand.get("experience", [])
-        if not experience_list:
+        years = float(cand.get("experience_years", 0) or 0)
+        if not experience_list and years <= 0:
             return 0.0
             
-        # Give up to 20% based on amount and quality of claims
-        total_claims = sum(len(exp.get("claims", [])) for exp in experience_list)
-        # Cap at 5 claims for max score
-        score = min(total_claims / 5.0, 1.0)
-        return score * 0.20
+        # Give up to 20% based on amount and quality of claims or responsibilities or years
+        total_claims = sum(len(exp.get("claims", []) or exp.get("responsibilities", [])) for exp in experience_list)
+        # Factor in years of experience (e.g. 1-2 years for junior dev is full score)
+        years_score = min(years / 2.0, 1.0) if years > 0 else 0.0
+        claims_score = min(total_claims / 3.0, 1.0) if total_claims > 0 else 0.0
+        
+        combined_ratio = max(years_score, claims_score, (years_score + claims_score) / 2.0)
+        return round(min(0.20, combined_ratio * 0.20), 3)
 
     def _score_evidence(self, jd: Dict, cand: Dict) -> float:
         """Pillar 4: Evidence Signals (15% Weight)"""

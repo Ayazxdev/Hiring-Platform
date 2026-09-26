@@ -411,6 +411,28 @@ class AgentClient:
             actual_credential["codeforces"] = results["agents"].get("codeforces", {}).get("success", False)
             actual_credential["linkedin"] = results["agents"].get("linkedin", {}).get("success", False)
 
+            # Pull experience & projects into actual_credential from ATS if not present
+            ats_data = results["agents"].get("ats", {}).get("data", {})
+            if "experience" not in actual_credential and isinstance(ats_data, dict):
+                actual_credential["experience"] = ats_data.get("experience", [])
+            if "projects" not in actual_credential and isinstance(ats_data, dict):
+                actual_credential["projects"] = ats_data.get("projects", [])
+                
+            # Pull experience_years from LinkedIn or ATS
+            if not actual_credential.get("experience_years"):
+                linkedin_data = results["agents"].get("linkedin", {}).get("data", {})
+                if isinstance(linkedin_data, dict) and linkedin_data.get("experience_years"):
+                    actual_credential["experience_years"] = linkedin_data.get("experience_years")
+                elif isinstance(ats_data, dict) and ats_data.get("experience"):
+                    actual_credential["experience_years"] = len(ats_data.get("experience", [])) * 1.0
+
+            # Pull github_score from GitHub scraping if available
+            github_data = results["agents"].get("github", {}).get("data", {})
+            if isinstance(github_data, dict):
+                cred_signal = github_data.get("credibility_signal", {})
+                if cred_signal and "score" in cred_signal:
+                    actual_credential["github_score"] = cred_signal.get("score", 0) / 100.0
+
             logger.info("Step 7: Matching candidate to job")
             match_result = await self.match_candidate(
                 credential=actual_credential,

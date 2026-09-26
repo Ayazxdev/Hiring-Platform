@@ -618,12 +618,18 @@ Return ONLY valid JSON with this structure:
         all_date_matches = list(re.finditer(date_pattern, raw_text))
         all_dates = [m.group(0) for m in all_date_matches]
         
-        # Find Professional Experience section
+        # Find Professional/Work Experience section (handles all common header naming conventions)
         exp_match = re.search(
-            r'Professional\s+Experience(.+?)(?:Notable Projects|Technical Skills|Education|Publications|$)',
+            r'(?:^|\n)\s*(?:PROFESSIONAL\s+|WORK\s+|RELEVANT\s+)?EXPERIENCE\s*\n(.+?)(?=(?:^|\n)\s*(?:Notable\s+Projects|Projects|Technical\s+Skills|Skills|Education|Publications|$))',
             raw_text,
             re.DOTALL | re.IGNORECASE
         )
+        if not exp_match:
+            exp_match = re.search(
+                r'(?:PROFESSIONAL\s+|WORK\s+|RELEVANT\s+)?EXPERIENCE\b(.+?)(?:Notable\s+Projects|Projects|Technical\s+Skills|Skills|Education|Publications|$)',
+                raw_text,
+                re.DOTALL | re.IGNORECASE
+            )
         
         if exp_match:
             exp_section = exp_match.group(1)
@@ -668,23 +674,23 @@ Return ONLY valid JSON with this structure:
                                 responsibilities.append(resp_clean)
                             i += 1
                         
+                        claims = [{"claim": r, "action": r, "strength": "strong"} for r in responsibilities[:5]]
                         result["experience"].append({
                             "title": title,
                             "company": company,
                             "dates": dates,
-                            "responsibilities": responsibilities[:5]
+                            "responsibilities": responsibilities[:5],
+                            "claims": claims
                         })
                     i += 1
             else:
                 # FORMAT 2: pypdf - dates at TOP, titles only in section
-                # Job titles are: "Senior Research Scientist", "Machine Learning Engineer", etc.
                 job_title_pattern = r'^(?:Senior|Lead|Staff|Principal|Junior|Associate|Chief)?\s*(?:Research\s+)?(?:Scientist|Engineer|Developer|Architect|Manager|Director|Analyst).*$|^.*(?:Engineer|Scientist|Developer)\s*(?:I{1,3}|II|III|IV)?$'
                 
                 date_idx = 0
                 current_job = None
                 
                 for i, line in enumerate(lines):
-                    # Check if this looks like a job title
                     is_title = (
                         re.match(job_title_pattern, line, re.IGNORECASE) and
                         len(line) < 60 and
@@ -695,6 +701,7 @@ Return ONLY valid JSON with this structure:
                     if is_title:
                         # Save previous job
                         if current_job and current_job["title"]:
+                            current_job["claims"] = [{"claim": r, "action": r, "strength": "strong"} for r in current_job["responsibilities"][:5]]
                             result["experience"].append(current_job)
                         
                         # Assign date from global list
@@ -705,28 +712,35 @@ Return ONLY valid JSON with this structure:
                             "title": line,
                             "company": "",
                             "dates": dates,
-                            "responsibilities": []
+                            "responsibilities": [],
+                            "claims": []
                         }
                     elif current_job:
-                        # First non-responsibility line is company
                         if not current_job["company"] and not line.startswith(('Architected', 'Led', 'Published', 
                             'Contributed', 'Designed', 'Implemented', 'Built', 'Deployed', 'Developed', 'Integrated', 'Migrated')):
                             current_job["company"] = line
                         else:
                             if len(line) > 15:
                                 current_job["responsibilities"].append(line)
+                                current_job["claims"].append({"claim": line, "action": line, "strength": "strong"})
                 
                 # Don't forget last job
                 if current_job and current_job["title"]:
+                    current_job["claims"] = [{"claim": r, "action": r, "strength": "strong"} for r in current_job["responsibilities"][:5]]
                     result["experience"].append(current_job)
         
         # PROJECTS EXTRACTION - FIXED
-        
         proj_match = re.search(
-            r'(?:Notable\s+)?Projects(.+?)(?:Technical Skills|Education|Publications|$)',
+            r'(?:^|\n)\s*(?:Notable\s+)?Projects\s*\n(.+?)(?=(?:^|\n)\s*(?:Technical\s+Skills|Skills|Education|Publications|Experience|$))',
             raw_text,
             re.DOTALL | re.IGNORECASE
         )
+        if not proj_match:
+            proj_match = re.search(
+                r'(?:Notable\s+)?Projects(.+?)(?:Technical Skills|Education|Publications|$)',
+                raw_text,
+                re.DOTALL | re.IGNORECASE
+            )
         
         if proj_match:
             proj_section = proj_match.group(1)
@@ -735,16 +749,17 @@ Return ONLY valid JSON with this structure:
             current_project = None
             
             for line in lines:
-                # Project title line has | or -
                 if '|' in line:
                     if current_project:
+                        current_project["claims"] = [{"claim": h, "technologies": []} for h in current_project["highlights"]]
                         result["projects"].append(current_project)
                     
                     parts = line.split('|', 1)
                     current_project = {
                         "name": parts[0].strip(),
                         "description": parts[1].strip() if len(parts) > 1 else "",
-                        "highlights": []
+                        "highlights": [],
+                        "claims": []
                     }
                 
                 elif current_project:
@@ -753,95 +768,146 @@ Return ONLY valid JSON with this structure:
                         current_project["highlights"].append(detail)
             
             if current_project:
+                current_project["claims"] = [{"claim": h, "technologies": []} for h in current_project["highlights"]]
                 result["projects"].append(current_project)
         
-        # SKILLS EXTRACTION (Keyword-Based - Working)
-        
+        # SKILLS EXTRACTION (Keyword-Based)
         skills_section_match = re.search(
-            r'(?:Technical\s+)?Skills?(.+?)(?:Education|Publications|$)',
+            r'(?:^|\n)\s*(?:Technical\s+|Core\s+)?Skills?\s*\n(.+?)(?=(?:^|\n)\s*(?:Notable\s+Projects|Projects|Professional\s+Experience|Work\s+Experience|Experience|Education|Publications|$))',
             raw_text,
             re.DOTALL | re.IGNORECASE
         )
+        if not skills_section_match:
+            skills_section_match = re.search(
+                r'(?:Technical\s+|Core\s+)?Skills?\b(.+?)(?:Notable\s+Projects|Projects|Experience|Education|Publications|$)',
+                raw_text,
+                re.DOTALL | re.IGNORECASE
+            )
         
         skills_text = skills_section_match.group(1) if skills_section_match else raw_text
         
         # Known tech skill patterns (case insensitive search)
-        # Known tech skill patterns (case insensitive search)
-        # 2026 UPDATE: Expanded taxonomy to ensure we catch skills even if LLM fails
         tech_keywords = [
-    # Languages
-    "Python", "Java", "JavaScript", "TypeScript", "C++", "C#", "Go", "Rust", "Swift", "Kotlin", "Ruby", "PHP", "Scala", "R", "Dart", "Lua", "Perl", "Haskell", "Elixir", "C",
-    "Groovy", "Objective-C", "Assembly", "Bash", "PowerShell", "Solidity", "VBA", "Golang", "COBOL", "Fortran", "Crystal", "Nim", "Zig", "Hack",
+            # Languages
+            "Python", "Java", "JavaScript", "TypeScript", "C++", "C#", "Go", "Rust", "Swift", "Kotlin", "Ruby", "PHP", "Scala", "R", "Dart", "Lua", "Perl", "Haskell", "Elixir", "C",
+            "Groovy", "Objective-C", "Assembly", "Bash", "PowerShell", "Solidity", "VBA", "Golang", "COBOL", "Fortran", "Crystal", "Nim", "Zig", "Hack",
 
-    # Frontend
-    "React", "Angular", "Vue", "Svelte", "Next.js", "Nuxt", "HTML", "CSS", "Tailwind", "Bootstrap", "Sass", "Less", "Remix", "Gatsby", "Vite", "Webpack",
-    "Redux", "MobX", "Zustand", "Material UI", "Chakra UI", "Ant Design", "jQuery", "Three.js", "D3.js", "Framer Motion", "Storybook", "Lit", "Stencil",
-    "Alpine.js", "SolidJS", "Qwik", "Astro", "Ember.js", "Backbone.js",
+            # Frontend
+            "React", "Angular", "Vue", "Svelte", "Next.js", "Nuxt", "HTML", "CSS", "Tailwind", "Bootstrap", "Sass", "Less", "Remix", "Gatsby", "Vite", "Webpack",
+            "Redux", "MobX", "Zustand", "Material UI", "Chakra UI", "Ant Design", "jQuery", "Three.js", "D3.js", "Framer Motion", "Storybook", "Lit", "Stencil",
+            "Alpine.js", "SolidJS", "Qwik", "Astro", "Ember.js", "Backbone.js",
 
-    # Backend
-    "Node.js", "Django", "Flask", "FastAPI", "Spring", "Express", "Laravel", "Rails", "ASP.NET", ".NET", "Hibernate", "GraphQL", "REST", "gRPC",
-    "Spring Boot", "NestJS", "Koa", "Phoenix", "Micronaut", "Quarkus", "Dropwizard", "Play Framework", "tRPC",
-    "Prisma", "Sequelize", "TypeORM", "Mongoose", "Knex.js",
+            # Backend
+            "Node.js", "Django", "Flask", "FastAPI", "Spring", "Express", "Laravel", "Rails", "ASP.NET", ".NET", "Hibernate", "GraphQL", "REST", "gRPC",
+            "Spring Boot", "NestJS", "Koa", "Phoenix", "Micronaut", "Quarkus", "Dropwizard", "Play Framework", "tRPC", "Axum", "Tokio",
+            "Prisma", "Sequelize", "TypeORM", "Mongoose", "Knex.js",
 
-    # Mobile
-    "React Native", "Flutter", "SwiftUI", "Jetpack Compose", "Android", "iOS", "Xamarin", "Ionic", "Cordova",
+            # Mobile
+            "React Native", "Flutter", "SwiftUI", "Jetpack Compose", "Android", "iOS", "Xamarin", "Ionic", "Cordova",
 
-    # Database
-    "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Cassandra", "DynamoDB", "Oracle", "SQLite", "Firebase", "Supabase", "Neo4j",
-    "MariaDB", "CockroachDB", "Snowflake", "BigQuery", "Redshift", "ClickHouse", "InfluxDB", "TimescaleDB", "ArangoDB", "Realm",
+            # Database
+            "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Cassandra", "DynamoDB", "Oracle", "SQLite", "Firebase", "Supabase", "Neo4j",
+            "MariaDB", "CockroachDB", "Snowflake", "BigQuery", "Redshift", "ClickHouse", "InfluxDB", "TimescaleDB", "ArangoDB", "Realm",
+            "Databases", "DBMS",
 
-    # Data Engineering / Analytics
-    "Apache Spark", "Hadoop", "Kafka", "Airflow", "dbt", "Databricks", "Flink", "Presto", "Hive", "Talend",
-    "Power BI", "Tableau", "Looker", "Metabase", "SSIS", "ETL", "Data Warehousing",
+            # Data Engineering / Analytics
+            "Apache Spark", "Hadoop", "Kafka", "Airflow", "dbt", "Databricks", "Flink", "Presto", "Hive", "Talend",
+            "Power BI", "Tableau", "Looker", "Metabase", "SSIS", "ETL", "Data Warehousing",
 
-    # Cloud / DevOps
-    "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitLab CI", "CircleCI", "Linux", "Unix", "Bash", "Shell", "Nginx", "Apache",
-    "Helm", "ArgoCD", "Prometheus", "Grafana", "Datadog", "New Relic", "CloudFormation", "Pulumi",
-    "Serverless", "Cloud Run", "EC2", "S3", "Lambda", "CloudFront", "IAM", "Vercel", "Netlify",
-    "CI/CD", "DevOps", "Site Reliability Engineering", "SRE",
+            # Cloud / DevOps
+            "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitLab CI", "CircleCI", "Linux", "Unix", "Bash", "Shell", "Nginx", "Apache",
+            "Helm", "ArgoCD", "Prometheus", "Grafana", "Datadog", "New Relic", "CloudFormation", "Pulumi", "Docker Compose",
+            "Serverless", "Cloud Run", "EC2", "S3", "Lambda", "CloudFront", "IAM", "Vercel", "Netlify",
+            "CI/CD", "DevOps", "Site Reliability Engineering", "SRE", "GitHub Actions",
 
-    # AI / ML
-    "Machine Learning", "Deep Learning", "NLP", "Computer Vision", "TensorFlow", "PyTorch", "Keras", "Scikit-learn", "Pandas", "NumPy", "OpenCV", "HuggingFace", "LLM", "RAG", "LangChain",
-    "Transformers", "XGBoost", "LightGBM", "CatBoost", "MLflow", "Kubeflow", "ONNX", "OpenAI API", "Claude API",
-    "Prompt Engineering", "Fine-tuning", "Vector Databases", "FAISS", "Pinecone", "Weaviate",
+            # AI / ML
+            "Machine Learning", "Deep Learning", "NLP", "Computer Vision", "TensorFlow", "PyTorch", "Keras", "Scikit-learn", "Pandas", "NumPy", "OpenCV", "HuggingFace", "LLM", "RAG", "LangChain",
+            "Transformers", "XGBoost", "LightGBM", "CatBoost", "MLflow", "Kubeflow", "ONNX", "OpenAI API", "Claude API",
+            "Prompt Engineering", "Fine-tuning", "Vector Databases", "FAISS", "Pinecone", "Weaviate", "MCP",
 
-    # Security
-    "OAuth", "JWT", "OpenID", "Keycloak", "Auth0", "Cybersecurity", "Penetration Testing", "OWASP",
-    "Encryption", "SSL", "TLS", "Zero Trust", "SIEM",
+            # Security
+            "OAuth", "JWT", "OpenID", "Keycloak", "Auth0", "Cybersecurity", "Penetration Testing", "OWASP",
+            "Encryption", "SSL", "TLS", "Zero Trust", "SIEM",
 
-    # Testing
-    "Jest", "Mocha", "Chai", "JUnit", "TestNG", "PyTest", "RSpec",
-    "Selenium", "Cypress", "Playwright", "Postman", "Supertest",
-    "Unit Testing", "Integration Testing", "E2E Testing", "TDD", "BDD",
+            # Testing
+            "Jest", "Mocha", "Chai", "JUnit", "TestNG", "PyTest", "RSpec",
+            "Selenium", "Cypress", "Playwright", "Postman", "Supertest",
+            "Unit Testing", "Integration Testing", "E2E Testing", "TDD", "BDD",
 
-    # Architecture / Patterns
-    "Microservices", "Monolith", "Event-Driven Architecture", "Domain-Driven Design", "CQRS",
-    "MVC", "MVVM", "Clean Architecture", "Design Patterns", "System Design",
-    "Distributed Systems", "Message Queues", "RabbitMQ", "ActiveMQ",
+            # Architecture, Patterns & CS Fundamentals
+            "Data Structures & Algorithms", "Data Structures", "Algorithms", "DSA",
+            "Operating Systems", "OS", "System Design",
+            "Object-Oriented Programming", "OOP",
+            "REST APIs", "RESTful APIs", "REST API", "APIs",
+            "Asynchronous Programming", "Concurrent Programming", "Concurrency", "Multithreading",
+            "Microservices", "Monolith", "Event-Driven Architecture", "Domain-Driven Design", "CQRS",
+            "MVC", "MVVM", "Clean Architecture", "Design Patterns",
+            "Distributed Systems", "Message Queues", "RabbitMQ", "ActiveMQ",
 
-    # Web3 / Blockchain
-    "Blockchain", "Web3", "Ethereum", "Solana", "Smart Contracts", "Hardhat", "Truffle",
+            # Web3 / Blockchain
+            "Blockchain", "Web3", "Ethereum", "Solana", "Smart Contracts", "Hardhat", "Truffle",
 
-    # Game / Graphics
-    "Unity", "Unreal Engine", "Godot", "OpenGL", "WebGL",
+            # Game / Graphics
+            "Unity", "Unreal Engine", "Godot", "OpenGL", "WebGL",
 
-    # Tools
-    "Git", "GitHub", "GitLab", "Bitbucket", "Jira", "Postman", "Selenium", "Cypress", "Playwright", "Figma",
-    "VS Code", "IntelliJ", "PyCharm", "Eclipse", "Xcode", "Android Studio",
-    "Slack", "Notion", "Trello", "ClickUp",
+            # Tools
+            "Git", "GitHub", "GitLab", "Bitbucket", "Jira", "Figma",
+            "VS Code", "IntelliJ", "PyCharm", "Eclipse", "Xcode", "Android Studio",
+            "Slack", "Notion", "Trello", "ClickUp",
 
-    # Low Code / CMS
-    "WordPress", "Shopify", "Webflow", "Wix", "Strapi", "Contentful"
+            # Low Code / CMS
+            "WordPress", "Shopify", "Webflow", "Wix", "Strapi", "Contentful"
         ]
 
-
-        
         found_skills = set()
         for skill in tech_keywords:
-            escaped = re.escape(skill)
-            if re.search(rf'\b{escaped}\b', skills_text, re.I):
-                found_skills.add(skill)
-        
+            upper_s = skill.strip().upper()
+            if upper_s == "C++":
+                if re.search(r'(?:^|[^\w#+])C\+\+(?=[^\w#+]|$)', skills_text, re.IGNORECASE):
+                    found_skills.add("C++")
+            elif upper_s == "C#":
+                if re.search(r'(?:^|[^\w#+])C#(?=[^\w#+]|$)', skills_text, re.IGNORECASE):
+                    found_skills.add("C#")
+            elif upper_s == "C":
+                if re.search(r'(?:^|[^\w#+])C(?=[^\w#+]|$)', skills_text):
+                    found_skills.add("C")
+            elif upper_s == ".NET":
+                if re.search(r'(?:^|[^\w])\.NET(?=[^\w]|$)', skills_text, re.IGNORECASE):
+                    found_skills.add(".NET")
+            elif upper_s == "R":
+                if re.search(r'(?:^|[^\w])R(?=[,\s]|$)', skills_text):
+                    found_skills.add("R")
+            elif upper_s == "OS":
+                if re.search(r'(?:^|[^\w])OS(?=[,\s\./]|$)', skills_text):
+                    found_skills.add("OS")
+                    found_skills.add("Operating Systems")
+            elif upper_s == "OOP":
+                if re.search(r'(?:^|[^\w])OOP(?=[,\s\./]|$)', skills_text, re.IGNORECASE):
+                    found_skills.add("OOP")
+                    found_skills.add("Object-Oriented Programming")
+            elif upper_s == "DBMS":
+                if re.search(r'(?:^|[^\w])DBMS(?=[,\s\./]|$)', skills_text, re.IGNORECASE):
+                    found_skills.add("DBMS")
+                    found_skills.add("Databases")
+            elif upper_s == "DSA":
+                if re.search(r'(?:^|[^\w])DSA(?=[,\s\./]|$)', skills_text, re.IGNORECASE):
+                    found_skills.add("DSA")
+                    found_skills.add("Data Structures & Algorithms")
+            else:
+                escaped = re.escape(skill)
+                if re.search(rf'\b{escaped}\b', skills_text, re.IGNORECASE):
+                    found_skills.add(skill)
+
+        # Check raw text for essential CS concepts and C++ if missed in skills_text
+        for critical_skill in ["C++", "Rust", "Python", "Docker", "Data Structures & Algorithms", "DBMS", "Operating Systems", "REST APIs", "System Design", "Git"]:
+            if critical_skill not in found_skills:
+                if critical_skill == "C++":
+                    if re.search(r'(?:^|[^\w#+])C\+\+(?=[^\w#+]|$)', raw_text, re.IGNORECASE):
+                        found_skills.add("C++")
+                else:
+                    if re.search(rf'\b{re.escape(critical_skill)}\b', raw_text, re.IGNORECASE):
+                        found_skills.add(critical_skill)
+
         result["skills"] = [{"skill": s} for s in sorted(found_skills)]
         
         return result
